@@ -21,6 +21,21 @@ class Autorizacion(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     pdf_generado = models.BooleanField(default=False)
     faena = models.CharField(max_length=20, choices=FAENAS, default='mantos_blancos')
+    estado = models.CharField(
+        max_length=20,
+        choices=[('pendiente', 'Pendiente'), ('completada', 'Completada')],
+        default='pendiente'
+    )
+    pdf_generado = models.FileField(
+        upload_to='autorizaciones_pdf/pendientes/',
+        null=True,
+        blank=True
+    )
+    documento_firmado = models.FileField(
+        upload_to='autorizaciones_pdf/completadas/',
+        null=True,
+        blank=True
+    )
 
     class Meta:
         db_table = 'autorizacion'

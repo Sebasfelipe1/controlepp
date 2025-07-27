@@ -13,6 +13,8 @@ urlpatterns = [
     path('verificar-trabajador/', views.verificar_trabajador, name='verificar_trabajador'),
     path('validar_rut/', views.validar_rut_view, name='validar_rut'),
     path('pdf/<int:id>/', views.generar_pdf, name='generar_pdf'),
+    path('<int:autorizacion_id>/subir-firmado/', views.subir_documento_firmado, name='subir_documento_firmado'),
+    
 
 
 ]

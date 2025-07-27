@@ -19,3 +19,8 @@ class EPPForm(forms.ModelForm):
         model = EPP
         fields = ['nombre']
         labels = {'nombre': 'Nombre del EPP'}
+
+class SubirDocumentoFirmadoForm(forms.ModelForm):
+    class Meta:
+        model = Autorizacion
+        fields = ['documento_firmado']

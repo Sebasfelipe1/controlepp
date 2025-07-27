@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 urlpatterns = [
@@ -7,5 +7,6 @@ urlpatterns = [
     path('bodega/mantos-cobrizos/', views.bienvenida_faena, {'faena': 'mantos_cobrizos'}, name='bodega_mantos_cobrizos'),
     path('bodega/tigresa/', views.bienvenida_faena, {'faena': 'tigresa'}, name='bodega_tigresa'),
     path('bodega/revoltosa/', views.bienvenida_faena, {'faena': 'revoltosa'}, name='bodega_revoltosa'),
+    path('autorizaciones/', include('autorizaciones.urls')),
     
 ]

@@ -11,14 +11,15 @@
 
   <h4 class="mt-4">Autorizaciones Registradas</h4>
 
-  <table class="table table-striped">
+  <table class="table table-striped align-middle text-center">
     <thead>
       <tr>
         <th>ID</th>
         <th>Trabajador</th>
         <th>Encargado Bodega</th>
         <th>Fecha</th>
-        <th>PDF</th>
+        <th>Estado</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
@@ -29,11 +30,31 @@
           <td>{{ aut.personal_bodega }}</td>
           <td>{{ aut.fecha|date:"d-m-Y H:i" }}</td>
           <td>
-            <a href="{% url 'generar_pdf' aut.id %}" target="_blank" class="btn btn-sm btn-outline-dark">Ver PDF</a>
+            {% if aut.estado|lower == 'pendiente' %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+            {% else %}
+              <span class="badge bg-success">Completada</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if aut.estado|lower == 'pendiente' %}
+              <a href="{% url 'subir_documento_firmado' aut.id %}" class="btn btn-sm btn-outline-primary mb-1">
+                Subir firmado
+              </a>
+              <a href="{{ MEDIA_URL }}pdfs/autorizacion_{{ aut.id }}.pdf" target="_blank" class="btn btn-sm btn-outline-secondary">
+                Ver PDF
+              </a>
+            {% elif aut.estado|lower == 'completada' and aut.documento_firmado %}
+              <a href="{{ aut.documento_firmado.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                Ver firmado
+              </a>
+            {% endif %}
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="5">No hay autorizaciones disponibles.</td></tr>
+        <tr>
+          <td colspan="6">No hay autorizaciones disponibles.</td>
+        </tr>
       {% endfor %}
     </tbody>
   </table>

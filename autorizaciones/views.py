@@ -36,6 +36,12 @@ from .models import Autorizacion, EPP
 from django.db.models import Q
 from autorizaciones.models import PerfilUsuario
 
+from .forms import SubirDocumentoFirmadoForm
+
+from core.utils import obtener_faena
+from django.core.files.base import ContentFile
+import PyPDF2
+
 
 
 @login_required
@@ -163,8 +169,54 @@ def eliminar_epp(request, id):
         return redirect('lista_epp')
     return render(request, 'epp/eliminar.html', {'epp': epp})
 
+def subir_documento_firmado(request, autorizacion_id):
+    faena = obtener_faena(request.user)
+    autorizacion = get_object_or_404(Autorizacion, id=autorizacion_id, faena=faena)
 
+    if request.method == 'POST':
+        form = SubirDocumentoFirmadoForm(request.POST, request.FILES, instance=autorizacion)
 
+        if form.is_valid():
+            archivo = request.FILES.get('documento_firmado')
+
+            if archivo:
+                # Leer contenido del PDF
+                lector_pdf = PyPDF2.PdfReader(archivo)
+                texto = ""
+                for pagina in lector_pdf.pages:
+                    texto += pagina.extract_text()
+
+                texto = texto.lower()
+                id_actual = str(autorizacion.id)
+
+                if f"autorización nº {id_actual}" not in texto and f"autorizacion nº {id_actual}" not in texto:
+                    messages.error(
+                        request,
+                        f"⚠️ El PDF no corresponde a la autorización #{id_actual}. "
+                        "Verifica que estés subiendo el documento correcto."
+                    )
+                    return redirect('subir_documento_firmado', autorizacion_id=autorizacion.id)
+
+                # Guardar el PDF con nombre correcto
+                archivo.seek(0)  # Reposicionar al inicio
+                nombre_esperado = f"autorizacion_{autorizacion.id}.pdf"
+                autorizacion.documento_firmado.save(nombre_esperado, ContentFile(archivo.read()), save=False)
+
+            autorizacion.estado = 'completada'
+            autorizacion.save()
+            messages.success(request, f'Documento para autorización #{autorizacion.id} subido correctamente.')
+            return redirect('lista_autorizaciones')
+
+        else:
+            messages.error(request, "El formulario contiene errores.")
+
+    else:
+        form = SubirDocumentoFirmadoForm(instance=autorizacion)
+
+    return render(request, 'autorizaciones/subir_firmado.html', {
+        'form': form,
+        'autorizacion': autorizacion
+    })
 
 def verificar_trabajador(request):
     rut = request.GET.get('rut', '').strip()
