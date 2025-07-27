@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <h2>Registrar Autorización de Retiro de EPP</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-4">
+        <label>RUT del Trabajador</label>
+        <input type="text" name="rut_trabajador" class="form-control" value="{{ trabajador_info.rut }}" readonly>
+      </div>
+      <div class="col-md-4">
+        <label>Nombre Completo</label>
+        <input type="text" name="nombre_trabajador" class="form-control" value="{{ trabajador_info.nombre_completo }}" readonly>
+      </div>
+      <div class="col-md-4">
+        <label>Cargo</label>
+        <input type="text" class="form-control" value="{{ trabajador_info.cargo }}" readonly>
+      </div>
+    </div>
+
+    <hr>
+    <h4 class="mt-4">EPP Solicitado</h4>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="epp_select">Elemento de Protección</label>
+        <select id="epp_select" class="form-control">
+          <option value="">-- Selecciona un EPP --</option>
+          {% for epp in form.fields.epp_solicitado.queryset %}
+            <option value="{{ epp.id }}">{{ epp.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="cantidad_input">Cantidad</label>
+        <input type="number" id="cantidad_input" class="form-control" value="1" min="1">
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <button type="button" class="btn btn-outline-success w-100" onclick="agregarEPP()">Agregar EPP</button>
+      </div>
+    </div>
+
+    <table class="table table-bordered" id="tabla_epp">
+      <thead>
+        <tr>
+          <th>Elemento de Protección</th>
+          <th>Cantidad</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <input type="hidden" name="epp_solicitado" id="epp_solicitado_final">
+
+    <div class="form-group mt-4">
+      <label>Personal de Bodega:</label>
+      {{ form.personal_bodega }}
+    </div>
+
+    <div class="mt-4">
+      <button class="btn btn-primary" type="submit">Guardar y generar PDF</button>
+      <a href="{% url 'lista_autorizaciones' %}" class="btn btn-secondary">Volver</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  const eppSelect = document.getElementById("epp_select");
+  const cantidadInput = document.getElementById("cantidad_input");
+  const tablaEpp = document.getElementById("tabla_epp").getElementsByTagName("tbody")[0];
+  const inputFinal = document.getElementById("epp_solicitado_final");
+  let eppAgregados = [];
+
+  function agregarEPP() {
+    const eppId = eppSelect.value;
+    const eppNombre = eppSelect.options[eppSelect.selectedIndex].text;
+    const cantidad = parseInt(cantidadInput.value);
+
+    if (!eppId || cantidad < 1) return;
+
+    // Verificar si ya está agregado
+    const existente = eppAgregados.find(item => item.id === eppId);
+    if (existente) {
+      alert("Este EPP ya fue agregado. Si deseas cambiar la cantidad, elimínalo primero.");
+      return;
+    }
+
+    eppAgregados.push({ id: eppId, cantidad });
+
+    actualizarTabla();
+    actualizarInputFinal();
+
+    eppSelect.selectedIndex = 0;
+    cantidadInput.value = 1;
+  }
+
+  function eliminarEPP(index) {
+    eppAgregados.splice(index, 1);
+    actualizarTabla();
+    actualizarInputFinal();
+  }
+
+  function actualizarTabla() {
+    tablaEpp.innerHTML = "";
+    eppAgregados.forEach((item, idx) => {
+      const eppNombre = eppSelect.querySelector(`option[value="${item.id}"]`)?.text || "EPP";
+      const row = tablaEpp.insertRow();
+      row.innerHTML = `
+        <td>${eppNombre}</td>
+        <td>${item.cantidad}</td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarEPP(${idx})">Eliminar</button></td>
+      `;
+    });
+  }
+
+  function actualizarInputFinal() {
+    inputFinal.value = JSON.stringify(eppAgregados);
+  }
+</script>
+{% endblock %}

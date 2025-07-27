@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ingreso - Sistema Control EPP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+<link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+</head>
+<body>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card login-card shadow-lg rounded-4">
+        <div class="card-body text-center">
+          <img src="{% static 'img/LOGO.png' %}" alt="Logo empresa" class="logo-img">
+          <p class="slogan mb-4">Sistema de Control de Elementos de Protección Personal</p>
+          <h4 class="mb-4 text-primary">Ingreso al sistema</h4>
+          {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+          {% endif %}
+          <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="mb-3 text-start">
+              <label for="username" class="form-label">Usuario</label>
+              <input type="text" name="username" class="form-control" required>
+            </div>
+            <div class="mb-4 text-start">
+              <label for="password" class="form-label">Contraseña</label>
+              <input type="password" name="password" class="form-control" required>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn login-btn">Ingresar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Validar Identidad</h2>
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+  <form method="post" id="valida-form">
+    {% csrf_token %}
+    <label for="rut_input">Escanea el QR o escribe el RUT</label>
+    <input type="text" name="rut" id="rut_input" class="form-control" placeholder="Ej: 20884803-8" required autofocus>
+    <button type="submit" class="btn btn-primary mt-3">Validar</button>
+  </form>
+</div>
+
+<script>
+  // Si escanea QR y termina con Enter
+  document.getElementById('rut_input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('valida-form').submit();
+    }
+  });
+</script>
+{% endblock %}

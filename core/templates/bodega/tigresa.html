@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container mt-4">
+    <h2>Bienvenido a la Faena Tigresa</h2>
+    <p>Usuario: {{ request.user.username }}</p>
+    <p>Faena asignada: {{ request.user.perfilusuario.get_faena_display }}</p>
+  </div>
+{% endblock %}
