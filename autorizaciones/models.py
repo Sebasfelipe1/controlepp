@@ -3,7 +3,7 @@ from django.conf import settings
 
 ##USUARIO POR FAENA"
 FAENAS = [
-    ('mantos_blancos', 'Mantos Blancos'),
+    ('mantos_cobrizos', 'Mantos cobrizos'),
     ('tigresa', 'Tigresa'),
     ('revoltosa', 'Revoltosa'),
 ]

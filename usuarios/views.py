@@ -91,3 +91,4 @@ def redirect_to_dashboard(request):
         return redirect('prevencion_dashboard')
     return redirect('login')
 
+

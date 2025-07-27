@@ -18,14 +18,19 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from core.views import redirigir_por_faena, bodega_mantos_cobrizos_view, bodega_tigresa_view, bodega_revoltosa_view
+from core.views import redirigir_por_faena
+from autorizaciones import views  # ✅ Aquí está la vista generar_pdf
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('usuarios.urls')),  # login
-    path('core/', include('core.urls')),  # vistas de faena
-    path('autorizaciones/', include('autorizaciones.urls')),  # si lo usas
-]
-if settings.DEBUG:
-     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('', redirigir_por_faena),
+    path('core/', include('core.urls')),
+    path('autorizaciones/', include('autorizaciones.urls')),
+    path('usuarios/', include('usuarios.urls')),
 
+    # Ruta directa al PDF
+    path('pdf/<int:id>/', views.generar_pdf, name='generar_pdf'),
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

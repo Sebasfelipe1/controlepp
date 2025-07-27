@@ -33,7 +33,8 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 from .models import Autorizacion, EPP
-
+from django.db.models import Q
+from autorizaciones.models import PerfilUsuario
 
 
 
@@ -62,11 +63,14 @@ def registrar_autorizacion(request):
             autorizacion.personal_bodega = form.cleaned_data['personal_bodega']
             autorizacion.epp_solicitado = form.cleaned_data['epp_solicitado']
 
-            # ✅ faena se define por la sesión del usuario
-            if request.user.username in ['admin', 'prevencion']:
-                autorizacion.faena = form.cleaned_data['faena']  # admin puede elegir
+            # 🔐 Asignación automática de faena
+            if request.user.username.startswith("bodega_"):
+                # Extrae automáticamente la faena desde el username
+                autorizacion.faena = request.user.username.replace("bodega_", "").lower()
+            elif request.user.username == "prevencion":
+                autorizacion.faena = "prevencion"  # o dejar en blanco si no aplica
             else:
-                autorizacion.faena = request.user.perfilusuario.faena  # usuario común ya tiene faena asignada
+                autorizacion.faena = "admin"  # o permitir al admin seleccionarla si quieres
 
             autorizacion.save()
             del request.session['rut_validado']
@@ -80,10 +84,25 @@ def registrar_autorizacion(request):
     })
     
 
-def lista_autorizaciones(request):
-    autorizaciones = Autorizacion.objects.all().order_by('-fecha')
-    return render(request, 'autorizaciones/lista.html', {'autorizaciones': autorizaciones})
 
+@login_required
+def lista_autorizaciones(request):
+    try:
+        faena_usuario = request.user.perfilusuario.faena
+        print("FAENA DETECTADA:", faena_usuario)
+        autorizaciones = Autorizacion.objects.filter(faena=faena_usuario).order_by('-fecha')
+    except Exception as e:
+        print("ERROR O USUARIO SIN FAENA:", e)
+        autorizaciones = Autorizacion.objects.all().order_by('-fecha')
+
+    paginator = Paginator(autorizaciones, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'autorizaciones/lista.html', {
+        'page_obj': page_obj,
+        'MEDIA_URL': settings.MEDIA_URL  
+    })
 
 def agregar_epp(request):
     if request.method == 'POST':
@@ -145,16 +164,7 @@ def eliminar_epp(request, id):
     return render(request, 'epp/eliminar.html', {'epp': epp})
 
 
-def lista_autorizaciones(request):
-    autorizaciones_list = Autorizacion.objects.all().order_by('-fecha')
-    paginator = Paginator(autorizaciones_list, 5)  # Mostrar 5 por página
 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    return render(request, 'autorizaciones/lista.html', {
-        'page_obj': page_obj,
-    })
 
 def verificar_trabajador(request):
     rut = request.GET.get('rut', '').strip()
@@ -172,15 +182,15 @@ def verificar_trabajador(request):
 
 def validar_rut_view(request):
     if request.method == 'POST':
-        rut = request.POST.get('rut', '').strip()
-        try:
-            trabajador = Trabajador.objects.get(rut=rut)
-            request.session['rut_validado'] = rut
-            messages.success(request, f"✅ Trabajador validado: {trabajador.nombre} {trabajador.apellido_paterno} {trabajador.apellido_materno}")
+        rut = request.POST.get('rut')
+        if Trabajador.objects.filter(rut=rut).exists():
+            request.session['rut_validado'] = rut  # ✅ esto es lo importante
             return redirect('registrar_autorizacion')
-        except Trabajador.DoesNotExist:
-            messages.error(request, '❌ El trabajador no existe en la base de datos.')
-            return render(request, 'autorizaciones/validar_rut.html')
+        else:
+            return render(request, 'autorizaciones/validar_rut.html', {
+                'error': 'El trabajador no existe.'
+            })
+
     return render(request, 'autorizaciones/validar_rut.html')
 
 

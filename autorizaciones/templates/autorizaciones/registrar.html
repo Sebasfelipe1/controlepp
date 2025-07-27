@@ -19,7 +19,7 @@
       </div>
       <div class="col-md-4">
         <label>Nombre Completo</label>
-        <input type="text" name="nombre_trabajador" class="form-control" value="{{ trabajador_info.nombre_completo }}" readonly>
+        <input type="text" class="form-control" value="{{ trabajador_info.nombre_completo }}" readonly>
       </div>
       <div class="col-md-4">
         <label>Cargo</label>
@@ -59,6 +59,7 @@
       <tbody></tbody>
     </table>
 
+    <!-- Este input se llenará con JSON con los EPP seleccionados -->
     <input type="hidden" name="epp_solicitado" id="epp_solicitado_final">
 
     <div class="form-group mt-4">
@@ -87,7 +88,6 @@
 
     if (!eppId || cantidad < 1) return;
 
-    // Verificar si ya está agregado
     const existente = eppAgregados.find(item => item.id === eppId);
     if (existente) {
       alert("Este EPP ya fue agregado. Si deseas cambiar la cantidad, elimínalo primero.");
@@ -95,7 +95,6 @@
     }
 
     eppAgregados.push({ id: eppId, cantidad });
-
     actualizarTabla();
     actualizarInputFinal();
 

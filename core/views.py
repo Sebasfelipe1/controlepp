@@ -1,38 +1,36 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from autorizaciones.models import Autorizacion
+from django.core.paginator import Paginator
+from django.conf import settings
 
 @login_required
 def redirigir_por_faena(request):
     user = request.user
 
     if user.username in ['admin', 'prevencion']:
-        return redirect('dashboard_general')  # asegúrate de que esta URL exista
+        return redirect('dashboard_general')  # ajusta si es necesario
 
     try:
         faena = user.perfilusuario.faena
     except:
-        return redirect('sin_faena_asignada')  # opcional para usuarios sin perfil
+        return redirect('sin_faena_asignada')
 
-    if faena == 'mantos_cobrizos':
-        return redirect('bodega_mantos_cobrizos_view')
-    elif faena == 'tigresa':
-        return redirect('bodega_tigresa_view')
-    elif faena == 'revoltosa':
-        return redirect('bodega_revoltosa_view')
-    else:
-        return redirect('sin_faena_asignada')  # fallback
-    
-@login_required
-def bodega_mantos_cobrizos_view(request):
-    return render(request, 'bodega/mantos_cobrizos.html')
+    return redirect('bienvenida_faena', faena=faena.replace("_", "-"))
 
 
 @login_required
-def bodega_tigresa_view(request):
-    return render(request, 'bodega/tigresa.html')
+def bienvenida_faena(request, faena):
+    faena_slug = faena.replace("-", "_").lower()
 
+    autorizaciones = Autorizacion.objects.filter(faena=faena_slug).order_by('-id')
+    paginator = Paginator(autorizaciones, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-@login_required
-def bodega_revoltosa_view(request):
-    return render(request, 'bodega/revoltosa.html')
+    return render(request, f'bodega/{faena_slug}.html', {
+        'faena': faena_slug.capitalize(),
+        'usuario': request.user.username,
+        'page_obj': page_obj,
+        'MEDIA_URL': settings.MEDIA_URL
+    })

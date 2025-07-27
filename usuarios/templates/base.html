@@ -12,12 +12,20 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand" href="/">Control EPP</a>
+    <!-- Logo o nombre del sistema -->
+    <a class="navbar-brand" href="{{ ruta_inicio|default:'/' }}">Control EPP</a>
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
+        <!-- Enlace para volver a inicio/faena -->
+        <li class="nav-item">
+          <a class="nav-link" href="{{ ruta_inicio|default:'/' }}">Inicio</a>
+        </li>
+        <!-- Otras secciones -->
         <li class="nav-item">
           <a class="nav-link" href="{% url 'lista_autorizaciones' %}">Autorizaciones</a>
         </li>
@@ -63,6 +71,15 @@
 
 <!-- ✅ Scripts para Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ✅ Scripts para Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ✅ Bloque para cargar scripts personalizados desde otras plantillas -->
+{% block scripts %}
+{% endblock %}
+
+</body>
+</html>
 </body>
 </html>
 </body>
