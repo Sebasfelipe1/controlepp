@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Vista Previa de Autorización</h2>
+
+  <div class="card p-4 mb-4">
+    <p><strong>Nombre Trabajador:</strong> {{ autorizacion.nombre_trabajador }}</p>
+    <p><strong>RUT:</strong> {{ autorizacion.rut_trabajador }}</p>
+    <p><strong>Personal de Bodega:</strong> {{ autorizacion.personal_bodega }}</p>
+    <p><strong>Fecha:</strong> {{ autorizacion.fecha|date:"d-m-Y H:i" }}</p>
+    <p><strong>EPP Solicitado:</strong></p>
+      <ul>
+        {% for item in epp_detalles %}
+          <li>{{ item.nombre|upper }} x{{ item.cantidad }}</li>
+        {% empty %}
+          <li>No hay EPPs solicitados.</li>
+        {% endfor %}
+      </ul>
+  </div>
+
+      <a href="{% url 'generar_pdf' autorizacion.id %}" class="btn btn-primary" target="_blank">
+      📄 Ver / Imprimir PDF
+      </a>
+  <a href="{% url 'lista_autorizaciones' %}" class="btn btn-secondary">Volver al listado</a>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Listado completo de Autorizaciones (Prevención)</h2>
+
+  <table class="table table-striped align-middle text-center">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Trabajador</th>
+        <th>Encargado Bodega</th>
+        <th>Fecha</th>
+        <th>Faena</th>
+        <th>Estado</th>
+        <th>Documento</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for aut in page_obj %}
+        <tr>
+          <td>{{ aut.id }}</td>
+          <td>{{ aut.nombre_trabajador }}</td>
+          <td>{{ aut.personal_bodega }}</td>
+          <td>{{ aut.fecha|date:"d-m-Y H:i" }}</td>
+          <td>{{ aut.faena }}</td>
+          <td>
+            {% if aut.estado == 'pendiente' %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+            {% else %}
+              <span class="badge bg-success">Completada</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if aut.estado == 'completada' and aut.documento_firmado %}
+              <a href="{{ aut.documento_firmado.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                Ver firmado
+              </a>
+            {% else %}
+              <a href="{{ MEDIA_URL }}pdfs/autorizacion_{{ aut.id }}.pdf" target="_blank" class="btn btn-sm btn-outline-secondary">
+                Ver PDF
+              </a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7">No hay autorizaciones registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if page_obj.has_other_pages %}
+    <nav>
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+        {% endif %}
+
+        <li class="page-item disabled">
+          <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

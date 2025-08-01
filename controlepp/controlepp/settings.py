@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config, Csv
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,14 +33,21 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 AUTH_USER_MODEL = 'usuarios.CustomUser'
 
+
+#AUTH_USER_MODEL = 'autorizaciones.CustomUser'
+# Login 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/'  # <-- esto es lo que se usa por defecto al hacer login
 LOGOUT_REDIRECT_URL = 'login'
+        
 
 
 ##Configuracion archivos estaticos
 STATICFILES_DIRS = [ BASE_DIR / "static" ]
 STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Application definition
 
 INSTALLED_APPS = [
@@ -69,16 +78,20 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'controlepp.urls'
 
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / 'core' / 'templates'],
+        'APP_DIRS': True,  # ✅ MUY IMPORTANTE
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.ruta_inicio_context'
             ],
         },
     },

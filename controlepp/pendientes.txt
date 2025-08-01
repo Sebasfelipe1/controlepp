@@ -1,0 +1,18 @@
+
+Detalles del sistema y requerimientos restantes
+
+    1. Implementar el lector del código QR ya que se perdió
+
+    2. Validar que al momento de crear la solicitud se genere de inmediato el PDF y que no haya que poner "ver pdf" 
+       Para que se genere el archivo   
+
+    3. Repasar seguridad se sistema (Pendiente reunion con marcelo para establecer que tipo de seguridad desea)
+
+    4. Que al momento de ajuntar el pdf solo permita archivos "PDF" , y verificar si existen metodos de seguridad para evitar
+       Inyecciones a la página
+
+    5. El modulo de admin deberá poder usar todo el CRUD para los EPP , y poder manipular las autorizaciones y trabajadores
+
+    6. Los registros se deben de guardar en la nube de onedrive de alguna cuenta de carmen bajo (Conversable ya que se guardan en hosting)
+
+

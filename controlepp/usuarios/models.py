@@ -9,9 +9,12 @@ class UsuarioBodega(models.Model):
 
     class Meta:
         db_table = 'usuario_bodega'
-        managed = False
+
 
 class CustomUser(AbstractUser):
-    faena = models.CharField(max_length=50)
-    rol = models.CharField(max_length=20)
-    
+    ROL_CHOICES = [
+        ('admin', 'Administrador'),
+        ('bodega', 'Bodega'),
+        ('prevencion', 'Prevención'),
+    ]
+    rol = models.CharField(max_length=20, choices=ROL_CHOICES, default='bodega')

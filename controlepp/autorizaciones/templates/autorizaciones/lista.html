@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Listado de Autorizaciones</h2>
+
+  {% if mensajes %}
+    <div class="alert alert-info">{{ mensajes }}</div>
+  {% endif %}
+
+  <!-- Botón de agregar nueva autorización si se desea -->
+  <div class="mb-3 text-end">
+    <a href="{% url 'validar_rut' %}" class="btn btn-success">Nueva Autorización</a>
+  </div>
+  
+
+  {% if autorizaciones %}
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered text-center align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>RUT</th>
+          <th>Nombre</th>
+          <th>Cargo</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for autorizacion in autorizaciones %}
+        <tr>
+          <td>{{ autorizacion.id }}</td>
+          <td>{{ autorizacion.rut_trabajador }}</td>
+          <td>{{ autorizacion.nombre_completo }}</td>
+          <td>{{ autorizacion.cargo }}</td>
+          <td>{{ autorizacion.fecha }}</td>
+          <td>
+            <div style="font-size: 12px; color: gray;">
+              Estado bruto: "{{ autorizacion.estado }}"
+            </div>
+
+            {% if autorizacion.estado == 'pendiente' %}
+              <a href="{% url 'subir_documento_firmado' autorizacion.id %}" class="btn btn-sm btn-outline-primary mb-1">
+                Subir firmado
+              </a>
+              {% if autorizacion.pdf_generado %}
+                <a href="{{ autorizacion.pdf_generado.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                  Ver PDF
+                </a>
+              {% endif %}
+            {% elif autorizacion.estado == 'completada' %}
+              {% if autorizacion.documento_firmado %}
+                <a href="{{ autorizacion.documento_firmado.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                  Ver firmado
+                </a>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="alert alert-info mt-4">No hay autorizaciones registradas aún.</div>
+  {% endif %}
+</div>
+{% endblock %}

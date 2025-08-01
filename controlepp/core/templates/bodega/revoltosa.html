@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Bodega {{ faena }}</h2>
+  <p><strong>Usuario:</strong> {{ usuario }}</p>
+
+  <div class="mb-4">
+    <a href="{% url 'validar_rut' %}" class="btn btn-success">➕ Solicitar EPP</a>
+  </div>
+
+  <h4 class="mt-4">Autorizaciones Registradas</h4>
+
+  <table class="table table-striped align-middle text-center">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Trabajador</th>
+        <th>Encargado Bodega</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for aut in page_obj %}
+        <tr>
+          <td>{{ aut.id }}</td>
+          <td>{{ aut.nombre_trabajador }}</td>
+          <td>{{ aut.personal_bodega }}</td>
+          <td>{{ aut.fecha|date:"d-m-Y H:i" }}</td>
+          <td>
+            {% if aut.estado|lower == 'pendiente' %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+            {% else %}
+              <span class="badge bg-success">Completada</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if aut.estado|lower == 'pendiente' %}
+              <a href="{% url 'subir_documento_firmado' aut.id %}" class="btn btn-sm btn-outline-primary mb-1">
+                Subir firmado
+              </a>
+              <a href="{{ MEDIA_URL }}pdfs/autorizacion_{{ aut.id }}.pdf" target="_blank" class="btn btn-sm btn-outline-secondary">
+                Ver PDF
+              </a>
+            {% elif aut.estado|lower == 'completada' and aut.documento_firmado %}
+              <a href="{{ aut.documento_firmado.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                Ver firmado
+              </a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6">No hay autorizaciones disponibles.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if page_obj.has_other_pages %}
+    <nav>
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+        {% endif %}
+
+        <li class="page-item disabled">
+          <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

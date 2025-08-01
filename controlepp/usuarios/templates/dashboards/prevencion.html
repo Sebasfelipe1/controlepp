@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Panel de Prevención – Control EPP{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="m-0">Panel de Prevención</h2>
+    <button class="btn btn-outline-primary btn-sm"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#filtros"
+            aria-expanded="false"
+            aria-controls="filtros">
+      <i class="bi bi-funnel-fill"></i> Filtros
+    </button>
+  </div>
+
+  <div class="collapse mb-4" id="filtros">
+    <div class="card card-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label for="rut" class="form-label">RUT</label>
+          <input type="text" name="rut" id="rut" class="form-control"
+                 placeholder="11111111-1" value="{{ rut }}">
+        </div>
+        <div class="col-md-3">
+          <label for="faena" class="form-label">Faena</label>
+          <select name="faena" id="faena" class="form-select">
+            <option value="">Todas</option>
+            <option value="mantos_cobrizos" {% if faena == 'mantos_cobrizos' %}selected{% endif %}>Mantos Cobrizos</option>
+            <option value="bodega_tigresa" {% if faena == 'bodega_tigresa' %}selected{% endif %}>Tigresa</option>
+            <option value="revoltosa" {% if faena == 'revoltosa' %}selected{% endif %}>Revoltosa</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="fecha" class="form-label">Fecha</label>
+          <input type="date" name="fecha" id="fecha" class="form-control" value="{{ fecha }}">
+        </div>
+        <div class="col-md-3 d-flex justify-content-end gap-2">
+          <a href="{{ request.path }}" class="btn btn-outline-secondary">Borrar filtros</a>
+          <button type="submit" class="btn btn-primary">Aplicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0 text-center align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Trabajador</th>
+            <th>Faena</th>
+            <th>Encargado</th>
+            <th>Fecha</th>
+            <th>Items retirados</th>
+            <th>Documento</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for aut in page_obj %}
+            <tr>
+              <td>{{ aut.id }}</td>
+              <td>{{ aut.nombre_trabajador }}</td>
+              <td>{{ aut.faena }}</td>
+              <td>{{ aut.personal_bodega }}</td>
+              <td>{{ aut.fecha|date:"d-m-Y H:i" }}</td>
+              <td>
+                {% if aut.items_display %}
+                  <button type="button"
+                          class="btn btn-sm btn-outline-info"
+                          data-bs-toggle="popover"
+                          data-bs-trigger="hover focus"
+                          data-bs-html="true"
+                          title="Items retirados"
+                          data-bs-content="<ul class='list-unstyled mb-0 ps-2'>{% for item in aut.items_display %}<li>• {{ item.nombre }} ({{ item.cantidad }})</li>{% endfor %}</ul>">
+                    <i class="bi bi-list-ul"></i>
+                  </button>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if aut.documento_firmado %}
+                  <a href="{{ aut.documento_firmado.url }}" target="_blank"
+                     class="btn btn-sm btn-success"
+                     data-bs-toggle="popover"
+                     data-bs-trigger="hover focus"
+                     data-bs-html="true"
+                     title="Vista previa PDF"
+                     data-bs-content="<div style='width:120px;height:160px;'><object data='{{ aut.documento_firmado.url }}' type='application/pdf' width='120' height='160'><p>Vista previa no disponible</p></object></div>">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                  </a>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="d-flex justify-content-center">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&rut={{ rut }}&faena={{ faena }}&fecha={{ fecha }}">Anterior</a></li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&rut={{ rut }}&faena={{ faena }}&fecha={{ fecha }}">Siguiente</a></li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+      popoverTriggerList.forEach(function (el) { new bootstrap.Popover(el); });
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.forEach(function (el) { new bootstrap.Tooltip(el); });
+    });
+  </script>
+{% endblock %}
